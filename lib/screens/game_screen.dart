@@ -30,7 +30,25 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ],
       ),
-      body: const CardWidget(),
+      body: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemCount: _game.cards.length,
+        itemBuilder: (context, index) {
+          return CardWidget(
+            isFaceUp: _game.cards[index].isFaceUp,
+            onTap: () {
+              setState(() {
+                _game.onCardTapped(index);
+              });
+            },
+            iconName: _game.cards[index].iconName,
+          );
+        },
+      ),
     );
   }
 }
