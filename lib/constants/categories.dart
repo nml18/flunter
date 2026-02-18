@@ -8,9 +8,8 @@ const List<String> iconCategories = [
   'flowers',
   'frenzy_crystals',
   'houses',
-  'jewels',
   'masks',
   'vouchers',
-  'streamstones',
+  'stream_stones',
   'tickets',
 ];
