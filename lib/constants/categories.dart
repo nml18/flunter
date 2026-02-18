@@ -1,0 +1,16 @@
+const List<String> iconCategories = [
+  'armor_spheres',
+  'bamboo',
+  'books',
+  'charms',
+  'coins',
+  'eggs',
+  'flowers',
+  'frenzy_crystals',
+  'houses',
+  'jewels',
+  'masks',
+  'vouchers',
+  'streamstones',
+  'tickets',
+];
