@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flunter/constants/icon_categories.dart';
-import 'dart:math';
 
 class CardWidget extends StatefulWidget {
   final bool isFaceUp;
   final VoidCallback onTap;
   final String iconPath;
-  static final String iconCategory = iconCategories[Random().nextInt(iconCategories.length)];
 
   const CardWidget({
     super.key,
