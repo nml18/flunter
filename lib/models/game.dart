@@ -1,12 +1,14 @@
+import 'package:flunter/constants/icon_categories.dart';
 import 'package:flunter/constants/icon_colors.dart';
-import 'package:flunter/models/card.dart';
+import 'package:flunter/models/game_card.dart';
+import 'dart:math';
 
 enum Difficulties{easy, medium, hard}
 enum GameStatus{waiting, oneCardTapped, comparing, won}
 
 class Game{
-  List<Card> cards = [];
-  Difficulties difficulty;
+  List<GameCard> cards = [];
+  final Difficulties difficulty;
   GameStatus status = GameStatus.waiting;
   int attempts = 0;
   int? firstTappedIndex, secondTappedIndex;
@@ -26,12 +28,13 @@ class Game{
   }
 
   void initCards(int pairOfCards){
+    final String iconCategory = iconCategories[Random().nextInt(iconCategories.length)];
     for (int i = 0; i < pairOfCards; i++){
       String iconColor = iconColors[i];
       for (int j = 0; j < 2; j++){
-        cards.add(Card(
+        cards.add(GameCard(
           id: '${iconColor}_$j',
-          iconName: iconColor,
+          iconPath: 'icons/$iconCategory/$iconColor.svg',
         ));
       }
     }
@@ -45,26 +48,24 @@ class Game{
     status = GameStatus.waiting;
   }
 
-  void onCardTapped(int index){
-    Card tappedCard = cards[index];
+  void onCardTapped(int index, Function onAfterDelay){
+    GameCard tappedCard = cards[index];
     if (tappedCard.isFaceUp) return;
     if (status == GameStatus.comparing) return;
     if (status == GameStatus.won) return;
     if (index == firstTappedIndex) return;
+    tappedCard.isFaceUp = true;
 
     switch (status){
       case GameStatus.waiting:
-        tappedCard.isFaceUp = true;
         firstTappedIndex = index;
         status = GameStatus.oneCardTapped;
         break;
 
       case GameStatus.oneCardTapped:
-        tappedCard.isFaceUp = true;
         secondTappedIndex = index;
         status = GameStatus.comparing;
-
-        checkMatchingPair();
+        checkMatchingPair(onAfterDelay);
         break;
 
       default:
@@ -72,12 +73,12 @@ class Game{
     }
   }
 
-  void checkMatchingPair(){
+  void checkMatchingPair(Function onUpdate){
     attempts++;
-    Card firstTappedCard = cards[firstTappedIndex!];
-    Card secondTappedCard = cards[secondTappedIndex!];
+    GameCard firstTappedCard = cards[firstTappedIndex!];
+    GameCard secondTappedCard = cards[secondTappedIndex!];
 
-    if (firstTappedCard.iconName == secondTappedCard.iconName){
+    if (firstTappedCard.iconPath == secondTappedCard.iconPath){
       firstTappedCard.isMatched = true;
       secondTappedCard.isMatched = true;
       firstTappedIndex = null;
@@ -85,18 +86,19 @@ class Game{
       isGameOver() ? status = GameStatus.won : status = GameStatus.waiting;
     }
     else{
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(seconds: 1), () {
         firstTappedCard.isFaceUp = false;
         secondTappedCard.isFaceUp = false;
         firstTappedIndex = null;
         secondTappedIndex = null;
         status = GameStatus.waiting;
+        onUpdate();
       });
     }
   }
 
   void resetGame(){
-    for (Card card in cards){
+    for (GameCard card in cards){
       card.isFaceUp = false;
       card.isMatched = false;
     }
