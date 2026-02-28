@@ -27,7 +27,7 @@ class GridBoard extends StatelessWidget {
         return CardWidget(
           isFaceUp: cards[index].isFaceUp,
           onTap: () => onCardTapped(index),
-          iconName: cards[index].iconName,
+          iconPath: cards[index].iconPath,
         );
       },
     );
