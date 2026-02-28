@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flunter/constants/icon_categories.dart';
+import 'dart:math';
 
 class CardWidget extends StatefulWidget {
   final bool isFaceUp;
   final VoidCallback onTap;
-  final String iconName;
+  final String iconPath;
+  static final String iconCategory = iconCategories[Random().nextInt(iconCategories.length)];
 
   const CardWidget({
     super.key,
     required this.isFaceUp,
     required this.onTap,
-    required this.iconName,
+    required this.iconPath,
   });
 
   @override
@@ -37,10 +40,8 @@ class _CardWidgetState extends State<CardWidget> {
             ),
           ),
           child: SizedBox(
-            width: 80,
-            height: 120,
             child: widget.isFaceUp
-                ? SvgPicture.asset('icons/armor_spheres/${widget.iconName}')
+                ? SvgPicture.asset(widget.iconPath)
                 : SvgPicture.asset('icons/question_marks/black.svg'),
           ),
         ),
