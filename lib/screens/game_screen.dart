@@ -1,21 +1,52 @@
 import 'package:flunter/models/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flunter/widgets/card_widget.dart';
+import 'package:flunter/widgets/grid_board.dart';
 
-class GameScreen extends StatefulWidget{
-  const GameScreen({super.key});
+// GameScreen's Widget
+class GameScreen extends StatefulWidget {
+  final Difficulties difficulty;
+  const GameScreen({super.key, required this.difficulty});
 
   @override
   State<StatefulWidget> createState() => _GameScreenState();
 }
 
+// GameScreen's state
 class _GameScreenState extends State<GameScreen> {
-  late Game _game;  
+  late Game _game;
+
+  void _showWinDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Fluntered !'),
+        content: Text('Tentatives: ${_game.attempts}'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // ferme pop-up
+              Navigator.pop(context); // retour menu
+            },
+            child: const Text('Menu'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // ferme pop-up
+              setState(() {
+                _game.resetGame();
+              });
+            },
+            child: const Text('Rejouer'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    _game = Game(difficulty: Difficulties.easy);
+    _game = Game(difficulty: widget.difficulty);
   }
 
   @override
@@ -30,23 +61,13 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ],
       ),
-      body: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemCount: _game.cards.length,
-        itemBuilder: (context, index) {
-          return CardWidget(
-            isFaceUp: _game.cards[index].isFaceUp,
-            onTap: () {
-              setState(() {
-                _game.onCardTapped(index);
-              });
-            },
-            iconName: _game.cards[index].iconName,
-          );
+      body: GridBoard(
+        cards: _game.cards,
+        onCardTapped: (index) {
+          setState(() {
+            _game.onCardTapped(index, () {setState(() {});});
+            if(_game.isGameOver()) _showWinDialog();
+          });
         },
       ),
     );
