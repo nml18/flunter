@@ -1,6 +1,7 @@
 import 'package:flunter/models/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flunter/widgets/grid_board.dart';
+import 'dart:async';
 
 // GameScreen's Widget
 class GameScreen extends StatefulWidget {
@@ -14,39 +15,89 @@ class GameScreen extends StatefulWidget {
 // GameScreen's state
 class _GameScreenState extends State<GameScreen> {
   late Game _game;
+  late Timer _timer;
+  int _elapsedMilliseconds = 0; 
+  bool _gameStarted = false;
 
-  void _showWinDialog() {
+  void _showWinDialog(BuildContext gameScreenContext) {
+    _timer.cancel();
+    
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Fluntered !'),
-        content: Text('Tentatives: ${_game.attempts}'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // ferme pop-up
-              Navigator.pop(context); // retour menu
-            },
-            child: const Text('Menu'),
+      context: gameScreenContext,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) { 
+        return AlertDialog(
+          title: const Text('Fluntered !'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Tentatives: ${_game.attempts}'),
+              const SizedBox(height: 8),
+              Text('Temps: ${_formatTime(_elapsedMilliseconds)}'),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // ferme pop-up
-              setState(() {
-                _game.resetGame();
-              });
-            },
-            child: const Text('Rejouer'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pop(gameScreenContext);
+              },
+              child: const Text('Menu'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                setState(() {
+                  _game.resetGame();
+                  _elapsedMilliseconds = 0;  
+                  _gameStarted = false;
+                });
+              },
+              child: const Text('Restart'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _startTimerIfNeeded() {
+    if (!_gameStarted) {
+      _gameStarted = true;
+      _timer = Timer.periodic(const Duration(milliseconds: 10), (_) {
+        setState(() => _elapsedMilliseconds += 10);
+      });
+    }
+  }
+
+  void _checkGameOver() {
+    if (_game.isGameOver()) {
+      _timer.cancel();
+      _showWinDialog(context);
+    }
+  }
+
+  String _formatTime(int milliseconds) {
+    int totalSeconds = milliseconds ~/ 1000;
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+    int hundredths = (milliseconds % 1000) ~/ 10; 
+    
+    return '${minutes.toString().padLeft(2, '0')}:'
+           '${seconds.toString().padLeft(2, '0')}:'
+           '${hundredths.toString().padLeft(2, '0')}';
   }
 
   @override
   void initState() {
     super.initState();
     _game = Game(difficulty: widget.difficulty);
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -59,6 +110,10 @@ class _GameScreenState extends State<GameScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Text('Tentatives: ${_game.attempts}'),
           ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Temps: ${_formatTime(_elapsedMilliseconds)}'),
+          ),
         ],
       ),
       body: GridBoard(
@@ -66,7 +121,8 @@ class _GameScreenState extends State<GameScreen> {
         onCardTapped: (index) {
           setState(() {
             _game.onCardTapped(index, () {setState(() {});});
-            if(_game.isGameOver()) _showWinDialog();
+            _startTimerIfNeeded();
+            _checkGameOver();
           });
         },
       ),
