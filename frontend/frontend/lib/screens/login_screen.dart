@@ -4,7 +4,7 @@ import 'package:flunter/screens/menu_screen.dart';
 import 'package:flunter/services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {  // ← Changé en StatefulWidget
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
