@@ -36,7 +36,7 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyButton(BuildContext context, String label, Difficulties difficulty){
+  Widget _buildDifficultyButton(BuildContext context, String label, Difficulties difficulty) {
     return ElevatedButton(
       onPressed: () => _navigateToGame(context, difficulty),
       style: ElevatedButton.styleFrom(
